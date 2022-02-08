@@ -9,7 +9,8 @@ exports.Query = {
     hello: (parent, args, context) => {
         return "World!"
     },
-    products: (parent, args, {products, reviews}) => {
+    products: (parent, args, {db}) => {
+        const {products, reviews} = db
         const {filter} = args
         let validProducts = products
         if (filter) {
@@ -39,13 +40,14 @@ exports.Query = {
         }
         return validProducts
     },
-    product: (parent, args, {products}) => {
+    product: (parent, args, {db}) => {
+        const {products} = db
         return products.find((item) => item.id === args.id)
     },
     categories: (parent, arg, context) => {
-        return context.categories
+        return context.db.categories
     },
-    category: (parent, args, {categories}) => {
-        return categories.find((item) => item.id === args.id)
+    category: (parent, args, {db}) => {
+        return db.categories.find((item) => item.id === args.id)
     }
 }

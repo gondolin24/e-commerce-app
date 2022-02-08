@@ -1,29 +1,68 @@
 const {v4: uuid} = require('uuid')
-const {categories} = require("../db");
 exports.Mutation = {
-    addCategory: (parent, args, {categories}) => {
+    addCategory: (parent, args, {db}) => {
         const newCategory = {
             id: uuid(),
             name: args.input.name
         }
-        categories.push(newCategory)
+        db.categories.push(newCategory)
         return newCategory
     },
-    addProduct: (parent, args, {products}) => {
+    addProduct: (parent, args, {db}) => {
         const item = {
             ...args.input,
             id: uuid()
         }
 
-        products.push(item)
+        db.products.push(item)
         return item
     },
-    addReview(parent, args, {reviews}) {
+    addReview(parent, args, {db}) {
         const item = {
             ...args.input
         }
-        reviews.push(item)
+        db.reviews.push(item)
 
         return item
+    },
+    deleteCategory(parent, {id}, {db}) {
+        db.categories = db.categories.filter(items => items.id !== id)
+        db.products = db.products.map((product) => {
+            const category = (product.categoryId === id) ? null : product.category
+            return {
+                ...product,
+                category,
+                categoryId: (product.categoryId === id) ? null : product.categoryId
+            }
+        })
+
+        return true
+    },
+    deleteProduct(parent, {id}, {db}) {
+        db.reviews = db.reviews.filter((review) => review.productId !== id)
+        db.products = db.products.filter((product) => product.id !== id)
+        return true
+    },
+    deleteReview(parent, {id}, {db}) {
+        db.reviews = db.reviews.filter((review) => review.id !== id)
+        return true
+
+    },
+    updateCategory(parent, {id, input}, {db}) {
+        const newCat = {
+            id,
+            name: input.name
+        }
+
+        db.categories = db.categories.map((cat)=>{
+            if(cat.id === id){
+                return {...newCat}
+            }
+            return cat
+
+        })
+        return newCat
+
+
     }
 }
